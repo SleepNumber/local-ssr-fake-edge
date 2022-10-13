@@ -7,7 +7,7 @@
 !/log/.keep
 !/tmp/.keep
 
-# /node_modules
+/node_modules
 /.idea
 *.iml
 
