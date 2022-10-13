@@ -34,17 +34,16 @@ app.use(
         `<div id='react-app'>${html}</div>`,
       );
 
-      // // Add hardcoded burnin
-      // const categoryBurnedIn = withHtml.replace(
-      //   '<!-- Page Bundle',
-      //   `${categoryBurnin}\n<!-- Page Bundle`,
-      // );
-      // const result = categoryBurnedIn.replace(
-      //   '<!-- Page Bundle',
-      //   `${categoriesBurnin}\n<!-- Page Bundle`,
-      // );
-
-      return withHtml;
+      // Add hardcoded burnin
+      const categoryBurnedIn = withHtml.replace(
+        '<!-- Page Bundle',
+        `${categoryBurnin}\n<!-- Page Bundle`,
+      );
+      const result = categoryBurnedIn.replace(
+        '<!-- Page Bundle',
+        `${categoriesBurnin}\n<!-- Page Bundle`,
+      );
+      return result;
     },
   }),
 );
