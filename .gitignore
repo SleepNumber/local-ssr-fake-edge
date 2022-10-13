@@ -1,0 +1,14 @@
+# Ignore system files
+.DS_Store
+
+# Ignore all logfiles and tempfiles.
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+
+# /node_modules
+/.idea
+*.iml
+
+.eslintcache
