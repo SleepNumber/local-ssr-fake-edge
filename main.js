@@ -1,8 +1,8 @@
+import fs from 'fs';
 import proxy from 'express-http-proxy';
 import express from 'express';
-import fs from 'fs';
 
-const {styles, html, category, categories} = JSON.parse(
+const {html, category, categories} = JSON.parse(
   fs.readFileSync('./rendered.json'),
 );
 
@@ -12,6 +12,7 @@ const PORT = 8090;
 const categoryBurnin = `<script type="application/json" id="data-ssr-category" class="sn-json">${JSON.stringify(
   category,
 )}</script>`;
+
 const categoriesBurnin = `<script type="application/json" id="data-ssr-categories" class="sn-json">${JSON.stringify(
   categories,
 )}</script>`;
@@ -21,17 +22,14 @@ app.use(
   proxy('http://sleepnumber.test/', {
     preserveHostHdr: true,
 
-    // Proxy reequests that aren't sale page html to the right spot
+    // Proxy requests that aren't sale page html to the right spot
     proxyReqPathResolver: (req) => `/categories/beds-on-sale/${req.url}`,
 
-    userResDecorator: function (_, proxyResData) {
+    userResDecorator(_, proxyResData) {
       const htmlDoc = proxyResData.toString();
 
-      // Inject emotion styles
-      const withStyles = htmlDoc.replace('</head>', `${styles}\n</head>`);
-
       // Inject pre-rendered React
-      const withHtml = withStyles.replace(
+      const withHtml = htmlDoc.replace(
         `<div id='react-app'></div>`,
         `<div id='react-app'>${html}</div>`,
       );

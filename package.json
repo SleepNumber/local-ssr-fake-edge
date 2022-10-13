@@ -6,21 +6,22 @@
   "type": "module",
   "scripts": {
     "prettify": "prettier --write \"**/*.js\"",
-    "start": "node main.js",
-    "debug": "nodemon --inspect=localhost:9229 main.js"
-  },
-  "prettier": {
-    "bracketSpacing": false,
-    "jsxBracketSameLine": false,
-    "singleQuote": true,
-    "trailingComma": "all",
-    "printWidth": 80
+    "start": "nodemon main.js",
+    "debug": "nodemon --inspect=localhost:9229 main.js",
+    "lint": "eslint ./ --cache",
+    "lint:errors": "eslint / --cache --quiet",
+    "prettier": "prettier --write '**/*.{js,mjs}'",
+    "prettier:check": "prettier --list-different '**/*.{js,mjs}'"
   },
   "dependencies": {
     "@emotion/babel-plugin": "^11.10.2",
+    "eslint": "8.22.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-universe": "^11.1.0",
+    "eslint-plugin-import": "^2.26.0",
     "express": "^4.18.1",
     "express-http-proxy": "^1.6.3",
     "nodemon": "^2.0.20",
-    "prettier": "^2.6.2"
+    "prettier": "^2.7.1"
   }
 }

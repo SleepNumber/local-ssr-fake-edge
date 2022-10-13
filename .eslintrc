@@ -1,0 +1,101 @@
+{
+  "env": {
+    "node": true
+  },
+  "extends": ["universe", "prettier"],
+  "rules": {
+    // CORE
+    // ------------------------------------------------------------------------
+    "arrow-body-style": "off",
+    "camelcase": "off",
+    "consistent-return": ["warn"],
+    "default-case": ["warn"],
+    "guard-for-in": ["warn"],
+    "lines-between-class-members": "off",
+    "prefer-arrow-callback": ["warn", { "allowNamedFunctions": true }],
+    "prefer-const": ["warn"],
+    "prefer-destructuring": ["off"],
+    "prefer-rest-params": ["warn"],
+    "no-bitwise": ["warn"],
+    "no-cond-assign": ["warn"],
+    "no-extra-boolean-cast": ["warn"],
+    "no-lonely-if": ["warn"],
+    "no-nested-ternary": ["warn"],
+    "no-new": ["warn"],
+    "no-multi-assign": ["warn"],
+    "no-param-reassign": ["off"],
+    "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
+    "no-prototype-builtins": ["warn"],
+    "no-restricted-globals": ["warn"],
+    "no-restricted-syntax": ["warn"],
+    // Allow returning assignments when parens are used.
+    "no-return-assign": ["error", "except-parens"],
+    "no-script-url": ["warn"],
+    "no-shadow": "off",
+    "no-undef": ["error"],
+    "no-underscore-dangle": "off",
+    // Allow unused if named 'ignore', or prefixed with `_`
+    "no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "[iI]gnored|^_.*$",
+        "varsIgnorePattern": "[iI]gnored|^_.*$"
+      }
+    ],
+    "no-unused-expressions": ["warn"],
+    "no-useless-escape": ["warn"],
+    "no-use-before-define": ["error", { "functions": false }],
+    "object-shorthand": ["warn"],
+    "radix": ["warn"],
+
+    // IMPORT
+    // ------------------------------------------------------------------------
+    "import/no-named-as-default-member": ["off"],
+    "import/extensions": ["off"],
+    "import/no-cycle": ["error"],
+    "import/no-mutable-exports": ["warn"],
+    // Don't require an extension for imported files
+    "import/no-extraneous-dependencies": [
+      "error",
+      { "devDependencies": ["**/*.test.js"] }
+    ],
+    "import/order": [
+      "warn",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          ["internal", "parent", "sibling"],
+          "index"
+        ],
+        "pathGroups": [
+          {
+            "pattern": "Api/**",
+            "group": "internal"
+          },
+          {
+            "pattern": "Comp/**",
+            "group": "internal"
+          },
+          {
+            "pattern": "Styles/**",
+            "group": "internal"
+          },
+          {
+            "pattern": "Types/**",
+            "group": "internal"
+          },
+          {
+            "pattern": "Util/**",
+            "group": "internal"
+          },
+          {
+            "pattern": "images/**",
+            "group": "internal"
+          }
+        ]
+      }
+    ],
+    "import/prefer-default-export": ["off"]
+  }
+}
