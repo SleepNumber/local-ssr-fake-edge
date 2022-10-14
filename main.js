@@ -1,7 +1,11 @@
 import fs from 'fs';
 import proxy from 'express-http-proxy';
+import spdy from 'spdy';
 import express from 'express';
 import compression from 'compression';
+
+const app = express();
+const PORT = 8090;
 
 /** Gzip compression filter */
 function shouldCompress(req, res) {
@@ -27,9 +31,6 @@ new PerformanceObserver(entryList => {
 const {html, category, categories} = JSON.parse(
   fs.readFileSync('./rendered.json'),
 );
-
-const app = express();
-const PORT = 8090;
 
 const categoryBurnin = `<script type="application/json" id="data-ssr-category" class="sn-json">${JSON.stringify(
   category,
@@ -86,4 +87,16 @@ app.use(
   }),
 );
 
-app.listen(PORT, () => console.log(`Server listening on ${PORT}`));
+const options = {
+  cert: fs.readFileSync('./certs/certificate.pem'),
+  key: fs.readFileSync('./certs/key.pem'),
+};
+
+spdy.createServer(options, app).listen(PORT, (error) => {
+  if (error) {
+    console.error(error);
+    return process.exit(1);
+  } else {
+    console.log(`Server listening on ${PORT}`);
+  }
+});
