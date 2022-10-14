@@ -1,6 +1,28 @@
 import fs from 'fs';
 import proxy from 'express-http-proxy';
 import express from 'express';
+import compression from 'compression';
+
+/** Gzip compression filter */
+function shouldCompress(req, res) {
+  if (req.headers['x-no-compression']) {
+    // don't compress responses with this request header
+    return false;
+  }
+
+  // fallback to standard filter function
+  return compression.filter(req, res);
+}
+
+const lcpPrinter = `
+<script>
+new PerformanceObserver(entryList => {
+  for (const entry of entryList.getEntries()) {
+    console.log('LCP candidate:', entry.startTime, entry);
+  }
+}).observe({ type: 'largest-contentful-paint', buffered: true });
+</script>
+`;
 
 const {html, category, categories} = JSON.parse(
   fs.readFileSync('./rendered.json'),
@@ -17,6 +39,9 @@ const categoriesBurnin = `<script type="application/json" id="data-ssr-categorie
   categories,
 )}</script>`;
 
+// Add some gzipping to get close to production parity
+app.use(compression({filter: shouldCompress}));
+
 app.use(
   '/categories/beds-on-sale',
   proxy('http://sleepnumber.test/', {
@@ -26,24 +51,25 @@ app.use(
     proxyReqPathResolver: (req) => `/categories/beds-on-sale/${req.url}`,
 
     userResDecorator(_, proxyResData) {
-      const htmlDoc = proxyResData.toString();
+      let response = proxyResData.toString();
+      response = response.replace('</head>', `${lcpPrinter}</head>`);
 
       // Inject pre-rendered React
-      const withHtml = htmlDoc.replace(
+      response = response.replace(
         `<div id='react-app'></div>`,
         `<div id='react-app'>${html}</div>`,
       );
 
-      // Add hardcoded burnin
-      const categoryBurnedIn = withHtml.replace(
+      response = response.replace(
         '<!-- Page Bundle',
         `${categoryBurnin}\n<!-- Page Bundle`,
       );
-      const result = categoryBurnedIn.replace(
+      response = response.replace(
         '<!-- Page Bundle',
         `${categoriesBurnin}\n<!-- Page Bundle`,
       );
-      return result;
+
+      return response;
     },
   }),
 );
