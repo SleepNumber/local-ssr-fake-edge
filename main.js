@@ -4,6 +4,8 @@ import spdy from 'spdy';
 import express from 'express';
 import compression from 'compression';
 
+process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+
 const app = express();
 const PORT = 8090;
 
@@ -45,7 +47,7 @@ app.use(compression({filter: shouldCompress}));
 
 app.use(
   '/categories/beds-on-sale',
-  proxy('http://sleepnumber.test/', {
+  proxy('https://sleepnumber.test/', {
     preserveHostHdr: true,
 
     // Proxy requests that aren't sale page html to the right spot
@@ -77,7 +79,7 @@ app.use(
 
 app.use(
   '/',
-  proxy('http://sleepnumber.test/', {
+  proxy('https://sleepnumber.test/', {
     preserveHostHdr: true,
     parseReqBody: false,
     userResHeaderDecorator: (headers) => {
