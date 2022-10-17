@@ -5,6 +5,7 @@ import express from 'express';
 import compression from 'compression';
 
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+const printLCP = process.argv.indexOf('--lcp') !== -1;
 
 const app = express();
 const PORT = 8090;
@@ -20,7 +21,8 @@ function shouldCompress(req, res) {
   return compression.filter(req, res);
 }
 
-const lcpPrinter = `
+const lcpPrinter = printLCP
+  ? `
 <script>
 new PerformanceObserver(entryList => {
   for (const entry of entryList.getEntries()) {
@@ -28,7 +30,8 @@ new PerformanceObserver(entryList => {
   }
 }).observe({ type: 'largest-contentful-paint', buffered: true });
 </script>
-`;
+`
+  : '';
 
 const {html, category, categories} = JSON.parse(
   fs.readFileSync('./rendered.json'),
