@@ -4,78 +4,42 @@ import spdy from 'spdy';
 import express from 'express';
 import compression from 'compression';
 
+import createCache from './src/util/cache.js';
+import lcpPrinter from './src/util/lcp.js';
+import shouldCompress from './src/util/compression.js';
+import getContent, { injectData } from './src/util/content.js';
+
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
-const printLCP = process.argv.indexOf('--lcp') !== -1;
 
-const app = express();
+const { html, category, categories } = getContent();
+
 const PORT = 8090;
-
-/** Gzip compression filter */
-function shouldCompress(req, res) {
-  if (req.headers['x-no-compression']) {
-    // don't compress responses with this request header
-    return false;
-  }
-
-  // fallback to standard filter function
-  return compression.filter(req, res);
-}
-
-const lcpPrinter = printLCP
-  ? `
-<script>
-new PerformanceObserver(entryList => {
-  for (const entry of entryList.getEntries()) {
-    console.log('LCP candidate:', entry.startTime, entry);
-  }
-}).observe({ type: 'largest-contentful-paint', buffered: true });
-</script>
-`
-  : '';
-
-const {html, category, categories} = JSON.parse(
-  fs.readFileSync('./rendered.json'),
-);
-
-const categoryBurnin = `<script type="application/json" id="data-ssr-category" class="sn-json">${JSON.stringify(
-  category,
-)}</script>`;
-
-const categoriesBurnin = `<script type="application/json" id="data-ssr-categories" class="sn-json">${JSON.stringify(
-  categories,
-)}</script>`;
-
+const app = express();
 // Add some gzipping to get close to production parity
-app.use(compression({filter: shouldCompress}));
+app.use(compression({ filter: shouldCompress }));
 
 app.use(
   '/categories/beds-on-sale',
+  createCache(60),
   proxy('https://sleepnumber.test/', {
     preserveHostHdr: true,
 
     // Proxy requests that aren't sale page html to the right spot
     proxyReqPathResolver: (req) => `/categories/beds-on-sale/${req.url}`,
 
+    // Inject ssr content into response
     userResDecorator(_, proxyResData) {
-      let response = proxyResData.toString();
-      response = response.replace('</head>', `${lcpPrinter}</head>`);
+      let res = proxyResData.toString();
+      res = res.replace('</head>', `${lcpPrinter}</head>`);
 
       // Inject pre-rendered React
-      response = response.replace(
+      res = res.replace(
         `<div id='react-app'></div>`,
         `<div id='react-app'>${html}</div>`,
       );
-
-      response = response.replace(
-        '<!-- Page Bundle',
-        `${categoryBurnin}\n<!-- Page Bundle`,
-      );
-      response = response.replace(
-        '<!-- Page Bundle',
-        `${categoriesBurnin}\n<!-- Page Bundle`,
-      );
-
-      return response;
+      res = injectData(res, category);
+      res = injectData(res, categories);
+      return res;
     },
   }),
 );
@@ -100,7 +64,7 @@ const options = {
 spdy.createServer(options, app).listen(PORT, (error) => {
   if (error) {
     console.error(error);
-    return process.exit(1);
+    process.exit(1);
   } else {
     console.log(`Server listening on ${PORT}`);
   }
