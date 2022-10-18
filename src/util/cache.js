@@ -24,8 +24,7 @@ function createCache(duration) {
         res.send = (body) => {
           zlib.unzip(body, (err, buffer) => {
             if (err) console.error(err);
-            const unzipped = buffer.toString('utf8');
-            cache.set(key, unzipped, duration);
+            else cache.set(key, buffer.toString('utf8'), duration);
           });
           res.ogSend(body);
         };
