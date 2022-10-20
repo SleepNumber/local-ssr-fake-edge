@@ -18,6 +18,7 @@ function createCache(duration) {
       if (cachedResponse) {
         console.log(`Cache hit for ${key}`);
         res.send(cachedResponse);
+        cache.set(key, cachedResponse, duration); // update time
       } else {
         console.log(`Cache miss for ${key}`);
         res.ogSend = res.send;
