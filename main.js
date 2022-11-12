@@ -66,6 +66,6 @@ spdy.createServer(options, app).listen(PORT, (error) => {
     console.error(error);
     process.exit(1);
   } else {
-    console.log(`Server listening on ${PORT}`);
+    console.log(`Server started at https://sleepnumber.test:${PORT}`);
   }
 });
