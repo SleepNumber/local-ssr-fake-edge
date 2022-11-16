@@ -11,7 +11,13 @@ import getContent, { injectData } from './src/util/content.js';
 
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
 
-const { html, category, categories } = getContent();
+const { html, category, categories, links } = getContent();
+
+const markup = [
+  '<link fetchpriority="high" rel="preload" href="',
+  '" as="image">',
+];
+const preloads = links.map((l) => markup.join(l)).join('');
 
 const PORT = 8090;
 const app = express();
@@ -30,6 +36,7 @@ app.use(
     // Inject ssr content into response
     userResDecorator(_, proxyResData) {
       let res = proxyResData.toString();
+      res = res.replace(`<head>`, `<head>${preloads}`);
       res = res.replace('</head>', `${lcpPrinter}</head>`);
 
       // Inject pre-rendered React
