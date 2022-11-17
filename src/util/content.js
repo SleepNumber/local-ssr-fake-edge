@@ -49,8 +49,48 @@ function getContent() {
   const data = JSON.parse(fs.readFileSync('./rendered.json'));
 
   delete data?.category?.breadcrumbs;
+  delete data?.category?.children;
+  delete data?.category?.sorts;
+
   (data?.categories || []).forEach((c) => {
     delete c?.breadcrumbs;
+    delete c?.facets;
+    delete c?.sorts;
+
+    c.products.forEach((product) => {
+      delete product?.content_blocks;
+      delete product?.featured_reviews;
+      delete product?.features;
+      delete product?.long_description;
+      delete product?.renders;
+      delete product?.original_min_price?.currency_iso;
+      delete product?.original_max_price?.currency_iso;
+      delete product?.sell_min_price?.currency_iso;
+      delete product?.sell_max_price?.currency_iso;
+
+      product.images = product.images.filter(
+        // preserve UPT and swatch images
+        (image) => image?.tags?.includes('upt') || image.options?.Color,
+      );
+
+      product.images.forEach((image) => delete image?.id);
+
+      product.variants.forEach((variant) => {
+        // These are only ever referenced in proptypes
+        delete variant?.regular?.currency_iso;
+        delete variant?.sale?.currency_iso;
+        delete variant?.list_id;
+        delete variant?.id;
+
+        // inactive skus are filtered out by the backend
+        delete variant?.active;
+
+        // Only used on matt pdp
+        delete variant?.alternate_promo_badge_message;
+      });
+
+      delete product?.videos;
+    });
   });
 
   const top = data?.category?.content_blocks?.top || [];
